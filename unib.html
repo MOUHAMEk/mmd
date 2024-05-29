@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Management des Projets de Construction</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        nav {
+            background-color: #28a745;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .login {
+            text-align: center;
+            margin-top: 50px;
+            background: url('https://www.constructionexec.com/assets/site_18/images/construction_bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            padding: 50px;
+            border-radius: 10px;
+        }
+
+        .login h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .login input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        .login button {
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 1em;
+        }
+
+        .login button:hover {
+            background-color: #218838;
+        }
+
+        .categories {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .categories button {
+            padding: 15px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 1em;
+            margin: 10px;
+        }
+
+        .categories button:hover {
+            background-color: #218838;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .center-text {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .center-text h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            font-family: 'Georgia', serif;
+            color: #333;
+        }
+
+        .center-text p {
+            font-size: 1em;
+            font-family: 'Arial', sans-serif;
+            color: #666;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        button.upload {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 1em;
+        }
+
+        button.upload:hover {
+            background-color: #218838;
+        }
+
+        #progress {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .files-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .file-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            text-align: center;
+            width: 150px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .file-item a {
+            display: block;
+            margin-top: 10px;
+            color: #28a745;
+            text-decoration: none;
+        }
+
+        .file-item a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            background-color: #28a745;
+            color: #fff;
+            text-align: center;
+            padding: 15px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            font-size: 1em;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-app.js";
+        import { getStorage, ref, listAll, getDownloadURL, uploadBytesResumable, getMetadata } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAuupzFNNcS4uoNifysQuCjEgjIobP7_0k",
+            authDomain: "logiciel-86966.firebaseapp.com",
+            databaseURL: "https://logiciel-86966-default-rtdb.firebaseio.com",
+            projectId: "logiciel-86966",
+            storageBucket: "logiciel-86966.appspot.com",
+            messagingSenderId: "202216572476",
+            appId: "1:202216572476:web:88a0b1c222cbf15e892539",
+            measurementId: "G-37XN9LHCVY",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            const category = params.get('category');
+
+            if (category) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'none';
+                document.getElementById('categoryContainer').classList.remove('hidden');
+                document.getElementById('categoryTitle').innerText = category.charAt(0).toUpperCase() + category.slice(1);
+                listFilesByCategory(category);
+            } else {
+                const loggedIn = localStorage.getItem('loggedIn');
+                if (loggedIn) {
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('mainContainer').classList.remove('hidden');
+                }
+            }
+
+            window.onpopstate = function() {
+                document.getElementById('categoryContainer').classList.add('hidden');
+                document.getElementById('mainContainer').classList.remove('hidden');
+            };
+        });
+
+        async function listFilesByCategory(category) {
+            const storageRef = ref(storage, 'files/');
+            try {
+                const res = await listAll(storageRef);
+                const fileList = document.getElementById('fileList');
+                fileList.innerHTML = '';
+                let filesFound = false;
+
+                for (const itemRef of res.items) {
+                    const metadata = await getMetadata(itemRef);
+                    const fileCategory = metadata.customMetadata?.category || '';
+
+                    if (fileCategory === category) {
+                        filesFound = true;
+                        const downloadURL = await getDownloadURL(itemRef);
+                        const listItem = document.createElement('div');
+                        listItem.className = 'file-item';
+                        listItem.innerHTML = `<img src="https://img.icons8.com/ios-filled/100/000000/book.png" alt="File thumbnail"><br>${itemRef.name}<br>`;
+                        const link = document.createElement('a');
+                        link.href = downloadURL;
+                        link.textContent = 'Download';
+                        listItem.appendChild(link);
+                        fileList.appendChild(listItem);
+                    }
+                }
+
+                if (!filesFound) {
+                    fileList.innerHTML = '<p>Il n\'y a pas encore de fichiers dans cette catégorie.</p>';
+                }
+            } catch (error) {
+                console.error('Error listing files:', error);
+            }
+        }
+
+        window.uploadFile = function () {
+            const fileInput = document.getElementById("fileInput");
+            if (fileInput.files.length === 0) {
+                alert("Please select a file to upload.");
+                return;
+            }
+            const file = fileInput.files[0];
+            const author = document.getElementById("authorInput").value;
+            const description = document.getElementById("descriptionInput").value;
+            const category = document.getElementById("categorySelect").value;
+            const storageRef = ref(storage, 'files/' + file.name);
+
+            const customMetadata = {
+                customMetadata: {
+                    'author': author,
+                    'description': description,
+                    'category': category
+                }
+            };
+
+            const uploadTask = uploadBytesResumable(storageRef, file, customMetadata);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    document.getElementById('progress').innerText = 'Upload is ' + progress + '% done';
+                },
+                (error) => {
+                    console.error('Upload failed:', error);
+                },
+                () => {
+                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                        console.log('File available at', downloadURL);
+                        alert('File uploaded successfully!');
+                    });
+                }
+            );
+        }
+
+        window.login = function () {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (validateEmail(email) && password === 'med') {
+                localStorage.setItem('loggedIn', true);
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContainer').classList.remove('hidden');
+            } else {
+                alert('Invalid email or password.');
+            }
+        }
+
+        function validateEmail(email) {
+            const regex = /^[a-zA-Z0-9._%+-]+@univ.constantine3.dz$/;
+            return regex.test(email);
+        }
+
+        function getThumbnail(url) {
+            return url + '&page=1&zoom=100';
+        }
+
+        window.searchFiles = function () {
+            const searchQuery = document.getElementById("searchInput").value.toLowerCase();
+            const fileItems = document.querySelectorAll(".file-item");
+
+            fileItems.forEach(item => {
+                const fileName = item.textContent.toLowerCase();
+                if (fileName.includes(searchQuery)) {
+                    item.style.display = "block";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <nav>Management des Projets de Construction</nav>
+
+    <div id="loginContainer" class="container login">
+        <h1>Management des Projets de Construction</h1>
+        <input type="email" id="email" placeholder="Email (@univ.constantine3.dz)" required>
+        <input type="password" id="password" placeholder="Password (med)" required>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="mainContainer" class="container hidden">
+        <div class="center-text">
+            <h2>Ce site est pour archiver les documents de notre spécialité afin d'améliorer l'archivage des fichiers. Bienvenue à vous.</h2>
+            <p>Ajoutez des fichiers dans la catégorie qui convient</p>
+        </div>
+        <div class="categories">
+            <button onclick="window.location.href='?category=memoire'">Mémoire</button>
+            <button onclick="window.location.href='?category=rapport'">Rapport de stage</button>
+            <button onclick="window.location.href='?category=powerpoint'">PowerPoint Mémoire</button>
+            <button onclick="window.location.href='?category=examen'">Examen</button>
+            <button onclick="window.location.href='?category=cours'">Cours</button>
+        </div>
+
+        <div class="section" id="upload">
+            <h2>Upload a New File</h2>
+            <input type="file" id="fileInput"><br><br>
+            <label for="authorInput">Author:</label>
+            <input type="text" id="authorInput"><br><br>
+            <label for="descriptionInput">Description:</label>
+            <input type="text" id="descriptionInput"><br><br>
+            <label for="categorySelect">Category:</label>
+            <select id="categorySelect">
+                <option value="memoire">Mémoire</option>
+                <option value="rapport">Rapport de stage</option>
+                <option value="powerpoint">PowerPoint Mémoire</option>
+                <option value="examen">Examen</option>
+                <option value="cours">Cours</option>
+            </select><br><br>
+            <button class="upload" onclick="uploadFile()">Upload</button>
+            <div id="progress"></div>
+        </div>
+    </div>
+
+    <div id="categoryContainer" class="container hidden">
+        <h1 id="categoryTitle"></h1>
+        <input type="text" id="searchInput" placeholder="Search files..." oninput="searchFiles()">
+        <div class="files-container" id="fileList"></div>
+    </div>
+
+    <footer>
+        © 2024 Management des Projets de Construction. All rights reserved.
+    </footer>
+</body>
+
+</html>
